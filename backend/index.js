@@ -25,7 +25,10 @@ async function startServer() {
 
   try {
     console.log('Connecting to MongoDB...');
-    await mongoose.connect(MONGODB_URI);
+    await mongoose.connect(MONGODB_URI, {
+      serverSelectionTimeoutMS: 5000,
+      family: 4 // Force IPv4 to avoid some Render/Atlas DNS issues
+    });
     console.log('Connected to MongoDB Atlas');
 
     const userCount = await User.countDocuments();
