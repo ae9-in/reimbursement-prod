@@ -7,7 +7,7 @@ interface AuthContextType {
   role: AppRole;
   loading: boolean;
   signOut: () => Promise<void>;
-  signIn: (email: string, password?: string) => Promise<void>;
+  signIn: (email: string, password?: string, requiredRole?: string | string[]) => Promise<void>;
   signUp: (data: { email: string; password?: string; fullName: string; department: string }) => Promise<void>;
 }
 
@@ -61,10 +61,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
-  const signIn = async (email: string, password?: string) => {
+  const signIn = async (email: string, password?: string, requiredRole?: string | string[]) => {
     setLoading(true);
     try {
-      const data = await loginApi(email, password);
+      const data = await loginApi(email, password, requiredRole);
       setUser(data.user);
       setProfile(data.profile);
       setRole(data.user.role as AppRole);

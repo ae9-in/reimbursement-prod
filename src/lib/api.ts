@@ -153,13 +153,16 @@ export const updatePolicy = async (updates: Partial<Policy>) => {
   return res.json();
 };
 
-export const loginApi = async (email: string, password: string = "password123") => {
+export const loginApi = async (email: string, password: string = "password123", requiredRole?: string | string[]) => {
   const res = await fetch(`${API_URL}/auth/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, password })
+    body: JSON.stringify({ email, password, requiredRole })
   });
-  if (!res.ok) throw new Error('Invalid credentials');
+  if (!res.ok) {
+    const error = await res.json();
+    throw new Error(error.error || 'Invalid credentials');
+  }
   const data = await res.json();
   localStorage.setItem('auth_token', data.token);
   return data;

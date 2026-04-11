@@ -30,9 +30,17 @@ exports.register = async (req, res) => {
 
 exports.login = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, requiredRole } = req.body;
     const user = await User.findOne({ email });
     if (!user) return res.status(400).json({ error: 'Invalid credentials' });
+
+    // Role check
+    if (requiredRole) {
+      const roles = Array.isArray(requiredRole) ? requiredRole : [requiredRole];
+      if (!roles.includes(user.role)) {
+        return res.status(401).json({ error: 'Access denied for this portal' });
+      }
+    }
 
     const isMatch = await user.comparePassword(password);
     if (!isMatch) return res.status(400).json({ error: 'Invalid credentials' });

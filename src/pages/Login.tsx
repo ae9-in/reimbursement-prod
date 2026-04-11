@@ -27,7 +27,7 @@ const Login = () => {
         toast.success("Account created!");
         navigate("/dashboard");
       } else {
-        await signIn(email, password);
+        await signIn(email, password, ["employee", "manager"]);
         toast.success("Signed in successfully");
         navigate("/dashboard");
       }

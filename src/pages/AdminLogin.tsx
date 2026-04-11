@@ -20,7 +20,7 @@ const AdminLogin = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      await signIn(email, password);
+      await signIn(email, password, ["admin"]);
       toast.success("Admin signed in successfully");
       navigate("/dashboard");
     } catch (err: any) {
