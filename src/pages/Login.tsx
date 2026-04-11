@@ -49,16 +49,16 @@ const Login = () => {
           <CardDescription>{isSignUp ? "Create your account" : "Sign in to manage your travel claims"}</CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4" autoComplete="off">
             {isSignUp && (
               <div className="space-y-2">
                 <Label htmlFor="fullName">Full Name</Label>
-                <Input id="fullName" value={fullName} onChange={(e) => setFullName(e.target.value)} required />
+                <Input id="fullName" value={fullName} onChange={(e) => setFullName(e.target.value)} required autoComplete="name" />
               </div>
             )}
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+              <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required autoComplete="off" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
@@ -70,6 +70,7 @@ const Login = () => {
                   onChange={(e) => setPassword(e.target.value)} 
                   required 
                   minLength={6} 
+                  autoComplete="new-password"
                 />
                 <button
                   type="button"

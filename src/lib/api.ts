@@ -153,7 +153,7 @@ export const updatePolicy = async (updates: Partial<Policy>) => {
   return res.json();
 };
 
-export const loginApi = async (email: string, password: string = "password123", requiredRole?: string | string[]) => {
+export const loginApi = async (email: string, password?: string, requiredRole?: string | string[]) => {
   const res = await fetch(`${API_URL}/auth/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -172,7 +172,7 @@ export const registerApi = async (data: { email: string; password?: string; full
   const res = await fetch(`${API_URL}/auth/register`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ ...data, password: data.password || "password123" })
+    body: JSON.stringify({ ...data, password: data.password })
   });
   if (!res.ok) {
     const error = await res.json();

@@ -41,7 +41,7 @@ const AdminLogin = () => {
           <CardDescription className="text-zinc-400">Restricted access for administrators only</CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4" autoComplete="off">
             <div className="space-y-2">
               <Label htmlFor="email" className="text-zinc-300">Admin Email</Label>
               <Input 
@@ -51,6 +51,7 @@ const AdminLogin = () => {
                 onChange={(e) => setEmail(e.target.value)} 
                 required 
                 className="bg-zinc-800 border-zinc-700 text-zinc-100 focus:ring-red-600"
+                autoComplete="off"
               />
             </div>
             <div className="space-y-2">
@@ -64,6 +65,7 @@ const AdminLogin = () => {
                   required 
                   minLength={6} 
                   className="bg-zinc-800 border-zinc-700 text-zinc-100 focus:ring-red-600 pr-10"
+                  autoComplete="new-password"
                 />
                 <button
                   type="button"

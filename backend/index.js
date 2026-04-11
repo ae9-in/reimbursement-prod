@@ -50,10 +50,15 @@ async function startServer() {
 }
 
 async function seedData() {
-  const employeeEmail = "employee@example.com";
-  const managerEmail = "manager@example.com";
+  const employeeEmail = process.env.SEED_EMPLOYEE_EMAIL || "employee@example.com";
+  const managerEmail = process.env.SEED_MANAGER_EMAIL || "manager@example.com";
   const adminEmail = process.env.SEED_ADMIN_EMAIL || "admin@example.com";
-  const password = process.env.SEED_ADMIN_PASSWORD || "password123";
+  const password = process.env.SEED_ADMIN_PASSWORD;
+
+  if (!password) {
+    console.warn('Seeding skipped: SEED_ADMIN_PASSWORD environment variable not set.');
+    return;
+  }
 
   // Create Users
   const employee = await User.create({ email: employeeEmail, password, role: 'employee' });
@@ -61,12 +66,12 @@ async function seedData() {
   const admin = await User.create({ email: adminEmail, password, role: 'admin' });
 
   // Create Profiles
-  await Profile.create({ user_id: employee._id, full_name: "John Employee", email: employeeEmail, department: "Sales", manager_id: manager._id });
-  await Profile.create({ user_id: manager._id, full_name: "Jane Manager", email: managerEmail, department: "Sales", manager_id: admin._id });
+  await Profile.create({ user_id: employee._id, full_name: "Employee User", email: employeeEmail, department: "General", manager_id: manager._id });
+  await Profile.create({ user_id: manager._id, full_name: "Manager User", email: managerEmail, department: "General", manager_id: admin._id });
   await Profile.create({ user_id: admin._id, full_name: "Admin User", email: adminEmail, department: "IT", manager_id: null });
 
   // Create Initial Policy
-  await Policy.create({ rate_per_km: 8.0, max_distance_per_claim: 500, max_monthly_limit: 5000 });
+  await Policy.create({ rate_per_km: 10.0, max_distance_per_claim: 1000, max_monthly_limit: 10000 });
 }
 
 startServer().catch(err => {
