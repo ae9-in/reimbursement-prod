@@ -1,38 +1,43 @@
+console.log('App starting...');
+
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const dns = require('dns');
 const path = require('path');
-const { Profile, Policy, Claim, Comment } = require('./models');
 
-// Force Google DNS for Atlas SRV resolution
-dns.setServers(['8.8.8.8']);
-
-dotenv.config(); // Loads from .env if present, otherwise uses system env vars
+dotenv.config();
 
 const app = require('./app');
-const User = require('./models/User');
+const { User, Profile, Policy, Claim, Comment } = require('./models');
 
 const PORT = process.env.PORT || 3001;
 const MONGODB_URI = process.env.MONGODB_URI;
 
+console.log('Environment variables loaded. Port:', PORT);
+
 async function startServer() {
+  console.log('Starting server...');
+  
   if (!MONGODB_URI) {
-    throw new Error('MONGODB_URI is not defined. Please check your environment variables.');
+    console.error('CRITICAL ERROR: MONGODB_URI is not defined.');
+    process.exit(1);
   }
 
   try {
+    console.log('Connecting to MongoDB...');
     await mongoose.connect(MONGODB_URI);
     console.log('Connected to MongoDB Atlas');
 
-    // Check if seeding is needed (e.g., if no users exist)
     const userCount = await User.countDocuments();
+    console.log('Current user count:', userCount);
+    
     if (userCount === 0) {
       console.log('Database is empty. Seeding initial data...');
       await seedData();
       console.log('Database seeded successfully');
     }
 
-    app.listen(PORT, () => {
+    app.listen(PORT, '0.0.0.0', () => {
       console.log(`Server running on port ${PORT}`);
     });
   } catch (err) {
@@ -61,4 +66,7 @@ async function seedData() {
   await Policy.create({ rate_per_km: 8.0, max_distance_per_claim: 500, max_monthly_limit: 5000 });
 }
 
-startServer();
+startServer().catch(err => {
+  console.error('Global error during startServer:', err);
+  process.exit(1);
+});
