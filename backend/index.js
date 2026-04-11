@@ -7,7 +7,7 @@ const { Profile, Policy, Claim, Comment } = require('./models');
 // Force Google DNS for Atlas SRV resolution
 dns.setServers(['8.8.8.8']);
 
-dotenv.config({ path: path.join(__dirname, '.env') });
+dotenv.config(); // Loads from .env if present, otherwise uses system env vars
 
 const app = require('./app');
 const User = require('./models/User');
@@ -17,7 +17,7 @@ const MONGODB_URI = process.env.MONGODB_URI;
 
 async function startServer() {
   if (!MONGODB_URI) {
-    throw new Error('MONGODB_URI is not defined in .env');
+    throw new Error('MONGODB_URI is not defined. Please check your environment variables.');
   }
 
   try {
