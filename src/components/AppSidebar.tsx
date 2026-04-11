@@ -39,7 +39,7 @@ export function AppSidebar() {
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>
-            {!collapsed && "Travel Reimbursement"}
+            {!collapsed && "Reimbursement"}
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>

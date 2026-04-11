@@ -81,7 +81,7 @@ export default function EmployeeDashboard() {
           {claims.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               <FileText className="mx-auto h-12 w-12 mb-3 opacity-50" />
-              <p>No claims yet. Submit your first travel reimbursement claim!</p>
+              <p>No claims yet. Submit your first reimbursement claim!</p>
               <Button className="mt-4" onClick={() => navigate("/claims/new")}>Create Claim</Button>
             </div>
           ) : (
