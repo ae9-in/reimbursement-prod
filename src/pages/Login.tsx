@@ -90,13 +90,6 @@ const Login = () => {
               <Button variant="outline" size="sm" onClick={signOut} className="w-full">Sign Out to Switch Accounts</Button>
             </div>
           )}
-          {!isSignUp && (
-            <div className="mt-6 pt-4 border-t text-center">
-              <button onClick={() => navigate("/admin/login")} className="text-xs text-muted-foreground hover:text-primary transition-colors">
-                Are you an Administrator? <span className="underline">Access Admin Portal</span>
-              </button>
-            </div>
-          )}
         </CardContent>
       </Card>
     </div>

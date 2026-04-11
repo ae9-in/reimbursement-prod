@@ -87,11 +87,6 @@ const AdminLogin = () => {
               <Button variant="outline" size="sm" onClick={signOut} className="w-full border-zinc-700 text-zinc-300 hover:bg-zinc-800">Sign Out</Button>
             </div>
           )}
-          <div className="mt-6 pt-4 border-t border-zinc-800 text-center">
-            <button onClick={() => navigate("/login")} className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors">
-              Looking for the <span className="underline decoration-zinc-700">Employee Portal</span>?
-            </button>
-          </div>
         </CardContent>
       </Card>
     </div>
