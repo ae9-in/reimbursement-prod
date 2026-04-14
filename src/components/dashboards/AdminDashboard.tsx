@@ -91,6 +91,7 @@ export default function AdminDashboard() {
                   <TableHead>Purpose</TableHead>
                   <TableHead>Distance</TableHead>
                   <TableHead>Amount</TableHead>
+                  <TableHead>Receipt</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
@@ -103,6 +104,16 @@ export default function AdminDashboard() {
                     <TableCell className="max-w-[200px] truncate">{claim.purpose}</TableCell>
                     <TableCell>{claim.distance_km} km</TableCell>
                     <TableCell>₹{Number(claim.amount_calculated).toLocaleString()}</TableCell>
+                    <TableCell>
+                      {claim.receipt_url ? (
+                        <div className="flex items-center gap-1 text-primary hover:underline">
+                          <FileText className="h-4 w-4" />
+                          <span className="text-xs">View</span>
+                        </div>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">None</span>
+                      )}
+                    </TableCell>
                     <TableCell><StatusBadge status={claim.status} /></TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2" onClick={(e) => e.stopPropagation()}>

@@ -110,7 +110,8 @@ async function seedData() {
     odometer_start: 15400,
     odometer_end: 15520,
     status: 'submitted',
-    amount_calculated: 1200
+    amount_calculated: 1200,
+    receipt_url: "https://placehold.co/600x400/png?text=Sample+Receipt+1"
   });
 
   const claim2 = await Claim.create({
@@ -121,7 +122,8 @@ async function seedData() {
     odometer_start: 15520,
     odometer_end: 15605,
     status: 'manager_approved',
-    amount_calculated: 850
+    amount_calculated: 850,
+    receipt_url: "https://placehold.co/600x400/png?text=Sample+Receipt+2"
   });
 
   const claim3 = await Claim.create({
