@@ -96,16 +96,6 @@ const Login = () => {
               {isSignUp ? "Sign In" : "Sign Up"}
             </button>
           </div>
-          
-          {/* Debug Info */}
-          <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-md text-[10px] text-yellow-800 text-left">
-            <p className="font-bold mb-1">Development Mode - Default Credentials:</p>
-            <ul className="list-disc list-inside">
-              <li>Admin: admin@example.com / password123</li>
-              <li>Employee: employee@example.com / password123</li>
-            </ul>
-            <p className="mt-1">Note: Backend must be running and connected to DB (In-Memory fallback active).</p>
-          </div>
         </div>
       </Card>
     </div>
