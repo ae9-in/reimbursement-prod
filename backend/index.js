@@ -7,6 +7,15 @@ const path = require('path');
 
 dotenv.config();
 
+// Fix for querySrv ECONNREFUSED _mongodb._tcp...
+// This forces Node.js to use Google DNS instead of potentially broken local DNS
+try {
+  dns.setServers(['8.8.8.8', '8.8.4.4']);
+  console.log('DNS servers set to Google (8.8.8.8, 8.8.4.4)');
+} catch (e) {
+  console.warn('Failed to set DNS servers:', e.message);
+}
+
 const app = require('./app');
 const { User, Profile, Policy, Claim, Comment } = require('./models');
 

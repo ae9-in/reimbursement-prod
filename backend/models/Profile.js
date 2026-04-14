@@ -10,4 +10,4 @@ const ProfileSchema = new mongoose.Schema({
   updated_at: { type: Date, default: Date.now }
 });
 
-module.exports = mongoose.model('Profile', ProfileSchema);
+module.exports = mongoose.models.Profile || mongoose.model('Profile', ProfileSchema);

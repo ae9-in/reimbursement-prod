@@ -8,4 +8,4 @@ const PolicySchema = new mongoose.Schema({
   updated_by: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
 });
 
-module.exports = mongoose.model('Policy', PolicySchema);
+module.exports = mongoose.models.Policy || mongoose.model('Policy', PolicySchema);

@@ -19,4 +19,4 @@ const ClaimSchema = new mongoose.Schema({
   updated_at: { type: Date, default: Date.now }
 });
 
-module.exports = mongoose.model('Claim', ClaimSchema);
+module.exports = mongoose.models.Claim || mongoose.model('Claim', ClaimSchema);
