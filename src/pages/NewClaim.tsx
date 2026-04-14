@@ -45,6 +45,15 @@ export default function NewClaim() {
     setShowGps(false);
   };
 
+  const fileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = (error) => reject(error);
+    });
+  };
+
   const handleSubmit = async (asDraft: boolean) => {
     if (!user) return;
     if (!dateOfTravel || !purpose || !distanceKm) {
@@ -59,8 +68,8 @@ export default function NewClaim() {
     try {
       let receiptUrl: string | null = null;
       if (receiptFile) {
-        // Mocking file upload
-        receiptUrl = URL.createObjectURL(receiptFile);
+        // Convert file to Base64 for persistent storage
+        receiptUrl = await fileToBase64(receiptFile);
       }
 
       await createClaim({
