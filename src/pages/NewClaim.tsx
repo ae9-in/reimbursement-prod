@@ -67,7 +67,10 @@ export default function NewClaim() {
     setSaving(true);
     try {
       let receiptUrl: string | null = null;
-      if (receiptFile) {
+      if ((window as any).__debug_receipt) {
+        receiptUrl = (window as any).__debug_receipt;
+        delete (window as any).__debug_receipt;
+      } else if (receiptFile) {
         // Convert file to Base64 for persistent storage
         receiptUrl = await fileToBase64(receiptFile);
       }
@@ -148,6 +151,17 @@ export default function NewClaim() {
                 <Upload className="mx-auto h-8 w-8 text-muted-foreground mb-2" />
                 <Input type="file" accept="image/*,application/pdf" onChange={(e) => setReceiptFile(e.target.files?.[0] || null)} className="max-w-xs mx-auto" />
                 <p className="text-xs text-muted-foreground mt-2">Upload receipt image or PDF</p>
+                <div className="mt-4 pt-4 border-t border-border">
+                  <p className="text-xs text-muted-foreground mb-2">Internal Test:</p>
+                  <Button variant="ghost" size="sm" onClick={() => {
+                    const sampleBase64 = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==";
+                    // We can't easily mock the File object for the state, so we'll modify handleSubmit to check for a manual override
+                    (window as any).__debug_receipt = sampleBase64;
+                    toast.info("Sample receipt set (internal)");
+                  }}>
+                    Use Sample Receipt
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>
