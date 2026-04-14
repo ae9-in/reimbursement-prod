@@ -91,6 +91,57 @@ async function seedData() {
 
   // Create Initial Policy
   await Policy.create({ rate_per_km: 10.0, max_distance_per_claim: 1000, max_monthly_limit: 10000 });
+
+  // Create Sample Claims
+  const claim1 = await Claim.create({
+    employee_id: employee._id,
+    date_of_travel: new Date().toISOString().split('T')[0],
+    distance_km: 120,
+    purpose: "Client meeting in downtown",
+    odometer_start: 15400,
+    odometer_end: 15520,
+    status: 'submitted',
+    amount_calculated: 1200
+  });
+
+  const claim2 = await Claim.create({
+    employee_id: employee._id,
+    date_of_travel: new Date(Date.now() - 86400000).toISOString().split('T')[0],
+    distance_km: 85,
+    purpose: "Site visit for project Alpha",
+    odometer_start: 15520,
+    odometer_end: 15605,
+    status: 'manager_approved',
+    amount_calculated: 850
+  });
+
+  const claim3 = await Claim.create({
+    employee_id: manager._id,
+    date_of_travel: new Date(Date.now() - 172800000).toISOString().split('T')[0],
+    distance_km: 210,
+    purpose: "Inter-office coordination",
+    odometer_start: 42000,
+    odometer_end: 42210,
+    status: 'paid',
+    amount_calculated: 2100
+  });
+
+  console.log('Sample claims created successfully');
+
+  // Create Sample Comments
+  await Comment.create({
+    claim_id: claim1._id,
+    author_id: employee._id,
+    comment: "This was a standard business trip."
+  });
+
+  await Comment.create({
+    claim_id: claim2._id,
+    author_id: manager._id,
+    comment: "Looks good, approved."
+  });
+
+  console.log('Sample comments created successfully');
 }
 
 startServer().catch(err => {
