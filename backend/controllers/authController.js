@@ -5,10 +5,11 @@ const Profile = require('../models/Profile');
 exports.register = async (req, res) => {
   try {
     const { email, password, role, fullName, department, managerId } = req.body;
-    let user = await User.findOne({ email });
+    const normalizedEmail = email.toLowerCase();
+    let user = await User.findOne({ email: normalizedEmail });
     if (user) return res.status(400).json({ error: 'User already exists' });
 
-    user = new User({ email, password, role });
+    user = new User({ email: normalizedEmail, password, role });
     await user.save();
 
     const profile = new Profile({
@@ -31,24 +32,34 @@ exports.register = async (req, res) => {
 exports.login = async (req, res) => {
   try {
     const { email, password, requiredRole } = req.body;
-    const user = await User.findOne({ email });
-    if (!user) return res.status(400).json({ error: 'Invalid credentials' });
+    const normalizedEmail = email.toLowerCase();
+    console.log(`Login attempt for: ${normalizedEmail}`);
+    
+    const user = await User.findOne({ email: normalizedEmail });
+    if (!user) {
+      console.log(`User not found: ${email}`);
+      return res.status(400).json({ error: 'Invalid credentials' });
+    }
 
     // Role check
     if (requiredRole) {
       const roles = Array.isArray(requiredRole) ? requiredRole : [requiredRole];
       if (!roles.includes(user.role)) {
+        console.log(`Role mismatch for ${email}: expected ${requiredRole}, got ${user.role}`);
         return res.status(401).json({ error: 'Access denied for this portal' });
       }
     }
 
     const isMatch = await user.comparePassword(password);
+    console.log(`Password match for ${email}: ${isMatch}`);
+    
     if (!isMatch) return res.status(400).json({ error: 'Invalid credentials' });
 
     const profile = await Profile.findOne({ user_id: user._id });
     const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET || 'secret', { expiresIn: '1d' });
     res.json({ token, user: { id: user._id, email, role: user.role }, profile });
   } catch (err) {
+    console.error('Login error:', err);
     res.status(500).json({ error: err.message });
   }
 };

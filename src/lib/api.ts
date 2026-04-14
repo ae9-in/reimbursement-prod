@@ -46,7 +46,7 @@ export interface ClaimComment {
   created_at: string;
 }
 
-export const API_URL = import.meta.env.VITE_API_URL || 'https://reimbursement-prod.onrender.com/api';
+export const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
 const getHeaders = () => {
   const token = localStorage.getItem('auth_token');
@@ -157,7 +157,7 @@ export const loginApi = async (email: string, password?: string, requiredRole?: 
   const res = await fetch(`${API_URL}/auth/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, password, requiredRole })
+    body: JSON.stringify({ email: email.toLowerCase(), password: password?.trim(), requiredRole })
   });
   if (!res.ok) {
     const error = await res.json();

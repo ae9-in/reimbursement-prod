@@ -85,13 +85,28 @@ const Login = () => {
               {loading ? "Loading..." : isSignUp ? "Sign Up" : "Sign In"}
             </Button>
           </form>
-          {user && (
-            <div className="mt-4 p-3 bg-muted rounded-md text-xs text-center space-y-2">
-              <p>You are currently signed in as <strong>{profile?.full_name || user.email}</strong></p>
-              <Button variant="outline" size="sm" onClick={signOut} className="w-full">Sign Out to Switch Accounts</Button>
-            </div>
-          )}
         </CardContent>
+        <div className="px-6 pb-6 text-center space-y-4">
+          <div className="text-sm text-muted-foreground">
+            {isSignUp ? "Already have an account?" : "Don't have an account?"}{" "}
+            <button
+              onClick={() => setIsSignUp(!isSignUp)}
+              className="text-primary hover:underline font-medium"
+            >
+              {isSignUp ? "Sign In" : "Sign Up"}
+            </button>
+          </div>
+          
+          {/* Debug Info */}
+          <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-md text-[10px] text-yellow-800 text-left">
+            <p className="font-bold mb-1">Development Mode - Default Credentials:</p>
+            <ul className="list-disc list-inside">
+              <li>Admin: admin@example.com / password123</li>
+              <li>Employee: employee@example.com / password123</li>
+            </ul>
+            <p className="mt-1">Note: Backend must be running and connected to DB (In-Memory fallback active).</p>
+          </div>
+        </div>
       </Card>
     </div>
   );
