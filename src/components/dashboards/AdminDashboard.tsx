@@ -2,13 +2,14 @@ import { useEffect, useState } from "react";
 import { getClaims, getGeneralClaims, updateClaim, updateGeneralClaim, GeneralClaimRecord } from "@/lib/api";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
-import { FileText, Clock, CheckCircle, IndianRupee, TrendingUp, RefreshCw, Plus } from "lucide-react";
+import { FileText, Clock, CheckCircle, IndianRupee, TrendingUp, RefreshCw, Plus, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
 interface CombinedClaim {
@@ -35,6 +36,7 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [searchQuery, setSearchQuery] = useState<string>("");
   const [updatingId, setUpdatingId] = useState<string | null>(null);
 
   const loadData = async (silent = false) => {
@@ -118,8 +120,17 @@ export default function AdminDashboard() {
     }
   };
 
-  const filtered =
-    statusFilter === "all" ? claims : claims.filter(c => c.status === statusFilter);
+  const filtered = claims.filter(c => {
+    if (statusFilter !== "all" && c.status !== statusFilter) return false;
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      const matchesName = c.employee_name?.toLowerCase().includes(q);
+      const matchesPurpose = (c.purpose || c.description || "").toLowerCase().includes(q);
+      const matchesCategory = c.category?.toLowerCase().includes(q);
+      if (!matchesName && !matchesPurpose && !matchesCategory) return false;
+    }
+    return true;
+  });
 
   const travelClaimsCount = claims.filter(c => c.type === "travel").length;
   const generalClaimsCount = claims.filter(c => c.type === "general").length;
@@ -176,6 +187,17 @@ export default function AdminDashboard() {
             </CardContent>
           </Card>
         ))}
+      </div>
+
+      {/* Search Bar */}
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input
+          placeholder="Search by employee name, purpose, or category..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="pl-9"
+        />
       </div>
 
       {/* Claims Table */}
