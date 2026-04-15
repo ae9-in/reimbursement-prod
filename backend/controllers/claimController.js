@@ -5,9 +5,9 @@ exports.getClaims = async (req, res) => {
   try {
     const query = req.user.role === 'employee' ? { employee_id: req.user.id } : {};
 
-    // Exclude heavy fields from list view — receipt_url (Base64 image) and gps_route_data (coordinate arrays)
+    // Exclude heavy gps_route_data from list view, but include receipt_url
     const claims = await Claim.find(query)
-      .select('-receipt_url -gps_route_data')
+      .select('-gps_route_data')
       .sort({ created_at: -1 })
       .lean();
 
