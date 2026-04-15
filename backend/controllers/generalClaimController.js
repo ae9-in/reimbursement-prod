@@ -6,7 +6,6 @@ exports.getGeneralClaims = async (req, res) => {
   try {
     const query = req.user.role === 'employee' ? { employee_id: req.user.id } : {};
     const claims = await GeneralClaim.find(query)
-      .select('-receipt_url')
       .sort({ created_at: -1 })
       .lean();
     res.json(claims);

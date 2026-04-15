@@ -5,7 +5,7 @@ import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
   SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarFooter, useSidebar,
 } from "@/components/ui/sidebar";
-import { LayoutDashboard, FilePlus, FileText, Settings, BarChart3, LogOut, ClipboardList } from "lucide-react";
+import { LayoutDashboard, FilePlus, FileText, Settings, BarChart3, LogOut, ClipboardList, Receipt } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export function AppSidebar() {
@@ -29,6 +29,7 @@ export function AppSidebar() {
   const adminItems = [
     { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
     { title: "All Claims", url: "/claims", icon: FileText },
+    { title: "General Claims", url: "/admin/general-claims", icon: Receipt },
     { title: "Policies", url: "/admin/policies", icon: Settings },
     { title: "Reports", url: "/admin/reports", icon: BarChart3 },
   ];

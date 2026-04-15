@@ -14,6 +14,7 @@ import ClaimDetail from "@/pages/ClaimDetail";
 import Policies from "@/pages/Policies";
 import Reports from "@/pages/Reports";
 import AdminLogin from "@/pages/AdminLogin";
+import AdminGeneralClaims from "@/pages/AdminGeneralClaims";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -54,6 +55,7 @@ const App = () => (
               <Route path="/claims/:id" element={<ClaimDetail />} />
               <Route path="/admin/policies" element={<ProtectedRoute allowedRoles={["admin"]}><Policies /></ProtectedRoute>} />
               <Route path="/admin/reports" element={<ProtectedRoute allowedRoles={["admin"]}><Reports /></ProtectedRoute>} />
+              <Route path="/admin/general-claims" element={<ProtectedRoute allowedRoles={["admin"]}><AdminGeneralClaims /></ProtectedRoute>} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
