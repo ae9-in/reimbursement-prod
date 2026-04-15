@@ -4,6 +4,7 @@ const authRoutes = require('./routes/authRoutes');
 const claimRoutes = require('./routes/claimRoutes');
 const policyRoutes = require('./routes/policyRoutes');
 const commentRoutes = require('./routes/commentRoutes');
+const generalClaimRoutes = require('./routes/generalClaimRoutes');
 
 const app = express();
 
@@ -15,5 +16,6 @@ app.use('/api/auth', authRoutes);
 app.use('/api/claims', claimRoutes);
 app.use('/api/policies', policyRoutes);
 app.use('/api/comments', commentRoutes);
+app.use('/api/general-claims', generalClaimRoutes);
 
 module.exports = app;

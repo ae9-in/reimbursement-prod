@@ -19,4 +19,7 @@ const ClaimSchema = new mongoose.Schema({
   updated_at: { type: Date, default: Date.now }
 });
 
+ClaimSchema.index({ employee_id: 1, created_at: -1 });
+ClaimSchema.index({ status: 1 });
+
 module.exports = mongoose.models.Claim || mongoose.model('Claim', ClaimSchema);

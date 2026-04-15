@@ -8,6 +8,7 @@ import AppLayout from "@/components/AppLayout";
 import Login from "@/pages/Login";
 import Dashboard from "@/pages/Dashboard";
 import NewClaim from "@/pages/NewClaim";
+import GeneralClaim from "@/pages/GeneralClaim";
 import ClaimsList from "@/pages/ClaimsList";
 import ClaimDetail from "@/pages/ClaimDetail";
 import Policies from "@/pages/Policies";
@@ -48,6 +49,7 @@ const App = () => (
             <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/claims/new" element={<ProtectedRoute allowedRoles={["employee"]}><NewClaim /></ProtectedRoute>} />
+              <Route path="/claims/general" element={<ProtectedRoute allowedRoles={["employee"]}><GeneralClaim /></ProtectedRoute>} />
               <Route path="/claims" element={<ClaimsList />} />
               <Route path="/claims/:id" element={<ClaimDetail />} />
               <Route path="/admin/policies" element={<ProtectedRoute allowedRoles={["admin"]}><Policies /></ProtectedRoute>} />

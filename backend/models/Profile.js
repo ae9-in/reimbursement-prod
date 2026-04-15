@@ -10,4 +10,6 @@ const ProfileSchema = new mongoose.Schema({
   updated_at: { type: Date, default: Date.now }
 });
 
+ProfileSchema.index({ user_id: 1 }, { unique: true });
+
 module.exports = mongoose.models.Profile || mongoose.model('Profile', ProfileSchema);

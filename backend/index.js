@@ -44,8 +44,12 @@ async function startServer() {
 
     console.log('Connecting to MongoDB...');
     await mongoose.connect(connectionString, {
-      serverSelectionTimeoutMS: 5000,
-      family: 4 // Force IPv4 to avoid some Render/Atlas DNS issues
+      serverSelectionTimeoutMS: 8000,
+      socketTimeoutMS: 30000,
+      connectTimeoutMS: 10000,
+      maxPoolSize: 10,        // keep up to 10 connections open — reused across requests
+      minPoolSize: 2,         // always keep 2 warm connections ready
+      family: 4               // Force IPv4 to avoid DNS issues
     });
     console.log('Connected to MongoDB');
 
@@ -59,7 +63,11 @@ async function startServer() {
     }
 
     app.listen(PORT, '0.0.0.0', () => {
-      console.log(`Server running on port ${PORT}`);
+      console.log('==========================================');
+      console.log(`🚀 Server is successfully running!`);
+      console.log(`📡 Port: ${PORT}`);
+      console.log(`🔗 Address: http://127.0.0.1:${PORT}`);
+      console.log('==========================================');
     });
   } catch (err) {
     console.error('Server failed to start:', err);

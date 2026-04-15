@@ -46,7 +46,7 @@ export interface ClaimComment {
   created_at: string;
 }
 
-export const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+export const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001/api';
 
 const getHeaders = () => {
   const token = localStorage.getItem('auth_token');
@@ -181,4 +181,60 @@ export const registerApi = async (data: { email: string; password?: string; full
   const result = await res.json();
   localStorage.setItem('auth_token', result.token);
   return result;
+};
+
+// ─── General Claims API ───────────────────────────────────────────────────────
+
+export interface GeneralClaimData {
+  employee_name: string;
+  employee_code?: string;
+  department: string;
+  date_of_expense: string;
+  amount: number;
+  category: string;
+  description: string;
+  receipt_url?: string | null;
+  claim_id: string;
+}
+
+export interface GeneralClaimRecord extends GeneralClaimData {
+  _id: string;
+  id: string;
+  employee_id: string;
+  status: 'Pending' | 'Approved' | 'Rejected';
+  created_at: string;
+  updated_at: string;
+}
+
+export const getGeneralClaims = async (): Promise<GeneralClaimRecord[]> => {
+  const res = await fetch(`${API_URL}/general-claims`, { headers: getHeaders() });
+  if (res.ok) {
+    const data = await res.json();
+    return data.map((c: any) => ({ ...c, id: c._id }));
+  }
+  return [];
+};
+
+export const createGeneralClaim = async (claim: GeneralClaimData): Promise<GeneralClaimRecord> => {
+  const res = await fetch(`${API_URL}/general-claims`, {
+    method: 'POST',
+    headers: getHeaders(),
+    body: JSON.stringify(claim)
+  });
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(err.error || 'Failed to create general claim');
+  }
+  const data = await res.json();
+  return { ...data, id: data._id };
+};
+
+export const updateGeneralClaim = async (id: string, updates: Partial<GeneralClaimRecord>): Promise<GeneralClaimRecord> => {
+  const res = await fetch(`${API_URL}/general-claims/${id}`, {
+    method: 'PATCH',
+    headers: getHeaders(),
+    body: JSON.stringify(updates)
+  });
+  const data = await res.json();
+  return { ...data, id: data._id };
 };

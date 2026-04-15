@@ -4,13 +4,22 @@ const Profile = require('../models/Profile');
 exports.getClaims = async (req, res) => {
   try {
     const query = req.user.role === 'employee' ? { employee_id: req.user.id } : {};
-    const claims = await Claim.find(query).sort({ created_at: -1 }).lean();
-    
-    // Enrich with profiles
-    const enrichedClaims = await Promise.all(claims.map(async (claim) => {
-      const profile = await Profile.findOne({ user_id: claim.employee_id }).lean();
+
+    // Exclude heavy fields from list view — receipt_url (Base64 image) and gps_route_data (coordinate arrays)
+    const claims = await Claim.find(query)
+      .select('-receipt_url -gps_route_data')
+      .sort({ created_at: -1 })
+      .lean();
+
+    // Batch-fetch all profiles in ONE query instead of one per claim (fixes N+1)
+    const employeeIds = [...new Set(claims.map(c => String(c.employee_id)))];
+    const profiles = await Profile.find({ user_id: { $in: employeeIds } }).lean();
+    const profileMap = Object.fromEntries(profiles.map(p => [String(p.user_id), p]));
+
+    const enrichedClaims = claims.map(claim => {
+      const profile = profileMap[String(claim.employee_id)] || null;
       return { ...claim, employee_profile: profile ? { ...profile, id: profile._id } : null };
-    }));
+    });
 
     res.json(enrichedClaims);
   } catch (err) {
