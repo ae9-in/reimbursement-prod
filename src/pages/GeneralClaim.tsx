@@ -114,6 +114,15 @@ function generateClaimId(): string {
   return `GCL-${new Date().getFullYear()}-${rand}`;
 }
 
+function fileToBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString("en-IN", {
     day: "2-digit",
@@ -186,38 +195,64 @@ export default function GeneralClaim() {
     }
 
     setSubmitting(true);
-    // Simulate async network call
-    await new Promise((r) => setTimeout(r, 800));
+    
+    try {
+      const newId = generateClaimId();
+      const receiptBase64 = receiptFile ? await fileToBase64(receiptFile) : undefined;
+      
+      await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001/api'}/general-claims`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+        },
+        body: JSON.stringify({
+          claim_id: newId,
+          employee_name: employeeName.trim(),
+          employee_code: employeeId.trim(),
+          department: department.trim(),
+          date_of_expense: dateOfExpense,
+          amount: Number(claimAmount),
+          category,
+          description: description.trim(),
+          receipt_url: receiptBase64 || null
+        })
+      });
 
-    const newId = generateClaimId();
-    const newRecord: GeneralClaimRecord = {
-      id: newId,
-      employeeName: employeeName.trim(),
-      department: department.trim(),
-      date: dateOfExpense,
-      category,
-      amount: Number(claimAmount),
-      description: description.trim(),
-      status: "Pending",
-      submittedAt: new Date().toISOString().split("T")[0],
-    };
+      toast.success("Claim submitted successfully!");
+      
+      const newRecord: GeneralClaimRecord = {
+        id: newId,
+        employeeName: employeeName.trim(),
+        department: department.trim(),
+        date: dateOfExpense,
+        category,
+        amount: Number(claimAmount),
+        description: description.trim(),
+        status: "Pending",
+        submittedAt: new Date().toISOString().split("T")[0],
+      };
 
-    setHistory((prev) => [newRecord, ...prev]);
-    setConfirmedId(newId);
-    setSubmitting(false);
+      setHistory((prev) => [newRecord, ...prev]);
+      setConfirmedId(newId);
 
-    // Reset form
-    setEmployeeName(
-      (user as any)?.name || (user as any)?.email?.split("@")[0] || ""
-    );
-    setEmployeeId("");
-    setDepartment("");
-    setDateOfExpense(new Date().toISOString().split("T")[0]);
-    setClaimAmount("");
-    setCategory("");
-    setDescription("");
-    setReceiptFile(null);
-    setErrors({});
+      // Reset form
+      setEmployeeName(
+        (user as any)?.name || (user as any)?.email?.split("@")[0] || ""
+      );
+      setEmployeeId("");
+      setDepartment("");
+      setDateOfExpense(new Date().toISOString().split("T")[0]);
+      setClaimAmount("");
+      setCategory("");
+      setDescription("");
+      setReceiptFile(null);
+      setErrors({});
+    } catch (err) {
+      toast.error("Failed to submit claim. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   // ─── Render ─────────────────────────────────────────────────────────────────
