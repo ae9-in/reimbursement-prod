@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { getClaims, updateClaim } from "@/lib/api";
+import { getClaims, getGeneralClaims, updateClaim, updateGeneralClaim, GeneralClaimRecord } from "@/lib/api";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
-import { FileText, Clock, CheckCircle, IndianRupee, TrendingUp, RefreshCw } from "lucide-react";
+import { FileText, Clock, CheckCircle, IndianRupee, TrendingUp, RefreshCw, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -11,9 +11,27 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
+interface CombinedClaim {
+  id: string;
+  type: "travel" | "general";
+  employee_name: string;
+  employee_profile?: { full_name: string };
+  date_of_travel?: string;
+  date_of_expense?: string;
+  purpose?: string;
+  description?: string;
+  category?: string;
+  distance_km?: number;
+  amount_calculated: number;
+  amount?: number;
+  status: string;
+  receipt_url?: string | null;
+  created_at: string;
+}
+
 export default function AdminDashboard() {
   const navigate = useNavigate();
-  const [claims, setClaims] = useState<any[]>([]);
+  const [claims, setClaims] = useState<CombinedClaim[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [statusFilter, setStatusFilter] = useState<string>("all");
@@ -23,8 +41,40 @@ export default function AdminDashboard() {
     if (!silent) setLoading(true);
     else setRefreshing(true);
     try {
-      const data = await getClaims();
-      setClaims(data);
+      const [travelClaims, generalClaims] = await Promise.all([
+        getClaims(),
+        getGeneralClaims()
+      ]);
+
+      const combined: CombinedClaim[] = [
+        ...travelClaims.map((c: any) => ({
+          id: c.id,
+          type: "travel" as const,
+          employee_name: c.employee_profile?.full_name || "Unknown",
+          employee_profile: c.employee_profile,
+          date_of_travel: c.date_of_travel,
+          purpose: c.purpose,
+          distance_km: c.distance_km,
+          amount_calculated: Number(c.amount_calculated),
+          status: c.status,
+          receipt_url: c.receipt_url,
+          created_at: c.created_at
+        })),
+        ...generalClaims.map((c: GeneralClaimRecord) => ({
+          id: c.id,
+          type: "general" as const,
+          employee_name: c.employee_name,
+          date_of_expense: c.date_of_expense,
+          description: c.description,
+          category: c.category,
+          amount_calculated: c.amount,
+          status: c.status === "Pending" ? "submitted" : c.status === "Approved" ? "manager_approved" : "rejected",
+          receipt_url: c.receipt_url,
+          created_at: c.created_at
+        }))
+      ];
+
+      setClaims(combined);
     } catch (err: any) {
       toast.error("Failed to load claims: " + err.message);
     } finally {
@@ -37,10 +87,19 @@ export default function AdminDashboard() {
     loadData();
   }, []);
 
-  const handleStatusUpdate = async (id: string, newStatus: string) => {
+  const handleStatusUpdate = async (id: string, newStatus: string, type: "travel" | "general") => {
     setUpdatingId(id);
     try {
-      await updateClaim(id, { status: newStatus as any });
+      if (type === "travel") {
+        await updateClaim(id, { status: newStatus as any });
+      } else {
+        const statusMap: Record<string, "Pending" | "Approved" | "Rejected"> = {
+          submitted: "Pending",
+          manager_approved: "Approved",
+          rejected: "Rejected"
+        };
+        await updateGeneralClaim(id, { status: statusMap[newStatus] });
+      }
       toast.success(
         newStatus === "rejected"
           ? "Claim rejected"
@@ -62,21 +121,23 @@ export default function AdminDashboard() {
   const filtered =
     statusFilter === "all" ? claims : claims.filter(c => c.status === statusFilter);
 
+  const travelClaimsCount = claims.filter(c => c.type === "travel").length;
+  const generalClaimsCount = claims.filter(c => c.type === "general").length;
   const totalDisbursed = claims
     .filter(c => c.status === "paid")
-    .reduce((s, c) => s + Number(c.amount_calculated), 0);
+    .reduce((s, c) => s + c.amount_calculated, 0);
   const pending = claims.filter(c =>
     ["submitted", "manager_approved"].includes(c.status)
   ).length;
   const avgValue = claims.length
-    ? claims.reduce((s, c) => s + Number(c.amount_calculated), 0) / claims.length
+    ? claims.reduce((s, c) => s + c.amount_calculated, 0) / claims.length
     : 0;
 
   const metrics = [
-    { label: "Total Claims", value: claims.length, icon: FileText, color: "text-blue-500" },
+    { label: "Travel Claims", value: travelClaimsCount, icon: FileText, color: "text-blue-500" },
+    { label: "General Claims", value: generalClaimsCount, icon: Plus, color: "text-indigo-500" },
     { label: "Total Disbursed", value: `₹${totalDisbursed.toLocaleString()}`, icon: IndianRupee, color: "text-emerald-500" },
     { label: "Pending Review", value: pending, icon: Clock, color: "text-amber-500" },
-    { label: "Avg Claim Value", value: `₹${Math.round(avgValue).toLocaleString()}`, icon: TrendingUp, color: "text-purple-500" },
   ];
 
   return (
@@ -162,10 +223,10 @@ export default function AdminDashboard() {
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead>Type</TableHead>
                     <TableHead>Employee</TableHead>
                     <TableHead>Date</TableHead>
-                    <TableHead>Purpose</TableHead>
-                    <TableHead>Distance</TableHead>
+                    <TableHead>Description</TableHead>
                     <TableHead>Amount</TableHead>
                     <TableHead>Receipt</TableHead>
                     <TableHead>Status</TableHead>
@@ -180,20 +241,27 @@ export default function AdminDashboard() {
                         "cursor-pointer transition-colors",
                         updatingId === claim.id && "opacity-50 pointer-events-none"
                       )}
-                      onClick={() => navigate(`/claims/${claim.id}`)}
+                      onClick={() => claim.type === "travel" ? navigate(`/claims/${claim.id}`) : navigate(`/general-claims/${claim.id}`)}
                     >
+                      <TableCell>
+                        <span className={cn(
+                          "px-2 py-1 rounded-full text-xs font-medium",
+                          claim.type === "travel" ? "bg-blue-100 text-blue-700" : "bg-purple-100 text-purple-700"
+                        )}>
+                          {claim.type === "travel" ? "Travel" : "General"}
+                        </span>
+                      </TableCell>
                       <TableCell className="font-medium">
-                        {claim.employee_profile?.full_name || "N/A"}
+                        {claim.employee_name || "N/A"}
                       </TableCell>
                       <TableCell>
-                        {new Date(claim.date_of_travel).toLocaleDateString("en-IN")}
+                        {new Date(claim.date_of_travel || claim.date_of_expense || claim.created_at).toLocaleDateString("en-IN")}
                       </TableCell>
                       <TableCell className="max-w-[200px] truncate">
-                        {claim.purpose}
+                        {claim.type === "travel" ? claim.purpose : claim.description || claim.category}
                       </TableCell>
-                      <TableCell>{claim.distance_km} km</TableCell>
                       <TableCell className="font-medium">
-                        ₹{Number(claim.amount_calculated).toLocaleString()}
+                        ₹{claim.amount_calculated.toLocaleString()}
                       </TableCell>
                       <TableCell>
                         {claim.receipt_url ? (
@@ -219,7 +287,7 @@ export default function AdminDashboard() {
                               variant="outline"
                               size="sm"
                               className="h-7 text-xs text-green-600 border-green-200 hover:bg-green-50"
-                              onClick={() => handleStatusUpdate(claim.id, "manager_approved")}
+                              onClick={() => handleStatusUpdate(claim.id, "manager_approved", claim.type)}
                             >
                               Approve
                             </Button>
@@ -229,7 +297,7 @@ export default function AdminDashboard() {
                               variant="outline"
                               size="sm"
                               className="h-7 text-xs text-blue-600 border-blue-200 hover:bg-blue-50"
-                              onClick={() => handleStatusUpdate(claim.id, "paid")}
+                              onClick={() => handleStatusUpdate(claim.id, "paid", claim.type)}
                             >
                               Paid
                             </Button>
@@ -240,7 +308,7 @@ export default function AdminDashboard() {
                               variant="outline"
                               size="sm"
                               className="h-7 text-xs text-red-600 border-red-200 hover:bg-red-50"
-                              onClick={() => handleStatusUpdate(claim.id, "rejected")}
+                              onClick={() => handleStatusUpdate(claim.id, "rejected", claim.type)}
                             >
                               Reject
                             </Button>
@@ -249,7 +317,7 @@ export default function AdminDashboard() {
                             variant="ghost"
                             size="sm"
                             className="h-7 text-xs"
-                            onClick={() => navigate(`/claims/${claim.id}`)}
+                            onClick={() => claim.type === "travel" ? navigate(`/claims/${claim.id}`) : navigate(`/general-claims/${claim.id}`)}
                           >
                             View
                           </Button>
