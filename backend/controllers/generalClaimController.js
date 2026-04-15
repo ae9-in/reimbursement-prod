@@ -4,12 +4,16 @@ const Profile = require('../models/Profile');
 // GET /api/general-claims — employees see own, admin/manager see all
 exports.getGeneralClaims = async (req, res) => {
   try {
+    console.log('[GeneralClaim] getGeneralClaims called, user role:', req.user.role, 'user id:', req.user.id);
     const query = req.user.role === 'employee' ? { employee_id: req.user.id } : {};
+    console.log('[GeneralClaim] Query:', JSON.stringify(query));
     const claims = await GeneralClaim.find(query)
       .sort({ created_at: -1 })
       .lean();
+    console.log('[GeneralClaim] Found claims count:', claims.length);
     res.json(claims);
   } catch (err) {
+    console.error('[GeneralClaim] Error:', err);
     res.status(500).json({ error: err.message });
   }
 };
@@ -28,6 +32,7 @@ exports.getGeneralClaim = async (req, res) => {
 // POST /api/general-claims
 exports.createGeneralClaim = async (req, res) => {
   try {
+    console.log('[GeneralClaim] createGeneralClaim called, body:', JSON.stringify(req.body));
     const { employee_name, employee_code, department, date_of_expense, amount, category, description, receipt_url, claim_id } = req.body;
     
     const newClaim = new GeneralClaim({
@@ -45,8 +50,10 @@ exports.createGeneralClaim = async (req, res) => {
     });
 
     await newClaim.save();
+    console.log('[GeneralClaim] Created new claim:', newClaim._id);
     res.status(201).json(newClaim);
   } catch (err) {
+    console.error('[GeneralClaim] Create Error:', err);
     res.status(500).json({ error: err.message });
   }
 };
